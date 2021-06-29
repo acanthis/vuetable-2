@@ -1,5 +1,5 @@
 {
-  "name": "vuetable-2",
+  "name": "vue-table2",
   "version": "0.0.1",
   "description": "Datatable component for Vue 2.x",
   "main": "dist/vuetable-2.js",
