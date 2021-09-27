@@ -154,6 +154,10 @@ export default {
       type: Boolean,
       default: true
     },
+    paginationMode: {
+      type: String,
+      default: 'offset'
+    },
     data: {
       type: [Array, Object],
       default: null
@@ -636,6 +640,16 @@ export default {
       ).catch(() => failed())
     },
 
+    loadCursorData (cursorUrl, success = this.loadSuccess, failed = this.loadFailed) {
+      this.fireEvent('loading')
+      this.httpOptions['params'] = this.getAppendParams( this.getAllQueryParams() )
+
+      return this.fetch(cursorUrl ? cursorUrl : this.apiUrl, this.httpOptions).then(
+          success,
+          failed
+      ).catch(() => failed())
+    },
+
     fetch (apiUrl, httpOptions) {
       if (this.httpFetch) {
         return this.httpFetch(apiUrl, httpOptions)
@@ -728,9 +742,12 @@ export default {
         return typeof(params) === 'object' ? params : {}
       }
 
-      params[this.queryParams.sort] = this.getSortParam()
-      params[this.queryParams.page] = this.currentPage
+      if ('offset' === this.paginationMode) {
+          params[this.queryParams.page] = this.currentPage
+      }
+
       params[this.queryParams.perPage] = this.perPage
+      params[this.queryParams.sort] = this.getSortParam()
 
       return params
     },
@@ -923,6 +940,10 @@ export default {
         this.currentPage = page
         this.loadData()
       }
+    },
+
+    gotoCursor(cursorUrl) {
+      this.loadCursorData(cursorUrl)
     },
 
     isVisibleDetailRow (rowId) {
@@ -1125,7 +1146,11 @@ export default {
       } else if (page === 'next') {
         this.gotoNextPage()
       } else {
-        this.gotoPage(page)
+        if (this.paginationMode === 'cursor') {
+            this.gotoCursor(page)
+        } else {
+            this.gotoPage(page)
+        }
       }
     },
 
