@@ -6,7 +6,7 @@
         <thead>
           <slot name="tableHeader" :fields="tableFields">
             <template v-for="(header, headerIndex) in headerRows">
-              <component :is="header" :key="headerIndex"
+              <component :is="header" :key="headerIndex" :fields="tableFields"
                 @vuetable:header-event="onHeaderEvent"
               ></component>
             </template>
@@ -21,7 +21,7 @@
       <thead v-if="!isFixedHeader">
       <slot name="tableHeader" :fields="tableFields">
         <template v-for="(header, headerIndex) in headerRows">
-          <component :is="header" :key="headerIndex"
+          <component :is="header" :key="headerIndex" :fields="tableFields"
             @vuetable:header-event="onHeaderEvent"
           ></component>
         </template>
