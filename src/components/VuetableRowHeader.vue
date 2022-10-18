@@ -45,12 +45,12 @@ import VuetableColGutter from './VuetableColGutter'
 
 export default {
   components: {
-    'vuetable-field-checkbox': VuetableFieldCheckbox, 
+    'vuetable-field-checkbox': VuetableFieldCheckbox,
     'vuetable-field-handle'  : VuetableFieldHandle,
     'vuetable-field-sequence': VuetableFieldSequence,
     VuetableColGutter
   },
-
+  props: ['fields'],
   computed: {
     sortOrder() {
       return this.$parent.sortOrder
