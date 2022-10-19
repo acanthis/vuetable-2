@@ -4,71 +4,94 @@
       <table :class="['vuetable', $_css.tableClass, $_css.tableHeaderClass]">
         <vuetable-col-group :is-header="true"/>
         <thead>
-          <slot name="tableHeader" :fields="tableFields">
-            <template v-for="(header, headerIndex) in headerRows">
-              <component :is="header" :key="headerIndex" :fields="tableFields"
-                @vuetable:header-event="onHeaderEvent"
-              ></component>
-            </template>
-          </slot>
+        <slot name="tableHeader" :fields="tableFields">
+          <template v-for="(header, headerIndex) in headerRows">
+            <component :is="header" :key="headerIndex" :fields="tableFields"
+                       @vuetable:header-event="onHeaderEvent"
+            ></component>
+          </template>
+        </slot>
         </thead>
       </table>
     </div>
 
     <div class="vuetable-body-wrapper" :class="{'fixed-header' : isFixedHeader}" :style="{height: tableHeight}">
       <table :class="['vuetable', isFixedHeader ? 'fixed-header' : '', $_css.tableClass, $_css.tableBodyClass]">
-      <vuetable-col-group/>
-      <thead v-if="!isFixedHeader">
-      <slot name="tableHeader" :fields="tableFields">
-        <template v-for="(header, headerIndex) in headerRows">
-          <component :is="header" :key="headerIndex" :fields="tableFields"
-            @vuetable:header-event="onHeaderEvent"
-          ></component>
-        </template>
-      </slot>
-      </thead>
-      <tfoot>
+        <vuetable-col-group/>
+        <thead v-if="!isFixedHeader">
+        <slot name="tableHeader" :fields="tableFields">
+          <template v-for="(header, headerIndex) in headerRows">
+            <component :is="header" :key="headerIndex" :fields="tableFields"
+                       @vuetable:header-event="onHeaderEvent"
+            ></component>
+          </template>
+        </slot>
+        </thead>
+        <tfoot>
         <slot name="tableFooter" :fields="tableFields"></slot>
-      </tfoot>
-      <tbody v-cloak class="vuetable-body">
+        </tfoot>
+        <tbody v-cloak class="vuetable-body">
         <template v-for="(item, itemIndex) in tableData">
           <tr :item-index="itemIndex"
-            :key="itemIndex"
-            :class="onRowClass(item, itemIndex)"
-            @click="onRowClicked(item, itemIndex, $event)"
-            @dblclick="onRowDoubleClicked(item, itemIndex, $event)"
-            @mouseover="onMouseOver(item, itemIndex, $event)"
+              :key="itemIndex"
+              :class="onRowClass(item, itemIndex)"
+              @click="onRowClicked(item, itemIndex, $event)"
+              @dblclick="onRowDoubleClicked(item, itemIndex, $event)"
+              @mouseover="onMouseOver(item, itemIndex, $event)"
           >
             <template v-for="(field, fieldIndex) in tableFields">
               <template v-if="field.visible">
                 <template v-if="isFieldComponent(field.name)">
-                  <component :is="field.name"
-                    :key="fieldIndex"
-                    :row-data="item" :row-index="itemIndex" :row-field="field"
-                    :vuetable="vuetable"
-                    :class="bodyClass('vuetable-component', field)"
-                    :style="{width: field.width}"
-                    @vuetable:field-event="onFieldEvent"
+                  <template v-if="field.children && Array.isArray(field.children)">
+                    <component v-for="(fieldChildren, fieldChildrenIndex) in field.children"
+                               :is="fieldChildren.name"
+                               :key="'child_td_'+ fieldChildrenIndex"
+                               :row-data="item" :row-index="itemIndex" :row-field="field"
+                               :vuetable="vuetable"
+                               :class="bodyClass('vuetable-component', field)"
+                               :style="{width: field.width}"
+                               @vuetable:field-event="onFieldEvent"
+                    ></component>
+                  </template>
+                  <component v-else
+                             :is="field.name"
+                             :key="fieldIndex"
+                             :row-data="item" :row-index="itemIndex" :row-field="field"
+                             :vuetable="vuetable"
+                             :class="bodyClass('vuetable-component', field)"
+                             :style="{width: field.width}"
+                             @vuetable:field-event="onFieldEvent"
                   ></component>
                 </template>
                 <template v-else-if="isFieldSlot(field.name)">
                   <td :class="bodyClass('vuetable-slot', field)"
-                    :key="fieldIndex"
-                    :style="{width: field.width}"
+                      :key="fieldIndex"
+                      :style="{width: field.width}"
                   >
                     <slot :name="field.name"
-                      :row-data="item" :row-index="itemIndex" :row-field="field"
+                          :row-data="item" :row-index="itemIndex" :row-field="field"
                     ></slot>
                   </td>
                 </template>
                 <template v-else>
-                  <td :class="bodyClass('vuetable-td-'+field.name, field)"
-                    :key="fieldIndex"
-                    :style="{width: field.width}"
-                    v-html="renderNormalField(field, item)"
-                    @click="onCellClicked(item, itemIndex, field, $event)"
-                    @dblclick="onCellDoubleClicked(item, itemIndex, field, $event)"
-                    @contextmenu="onCellRightClicked(item, itemIndex, field, $event)"
+                  <template v-if="field.children && Array.isArray(field.children)">
+                    <td v-for="(fieldChildren, fieldChildrenIndex) in field.children"
+                        :class="bodyClass('vuetable-td-'+fieldChildren.name, fieldChildren)"
+                        :key="'child_td_'+ fieldChildrenIndex"
+                        :style="{width: fieldChildren.width}"
+                        v-html="renderNormalField(fieldChildren, item)"
+                        @click="onCellClicked(item, itemIndex, fieldChildren, $event)"
+                        @dblclick="onCellDoubleClicked(item, itemIndex, fieldChildren, $event)"
+                        @contextmenu="onCellRightClicked(item, itemIndex, fieldChildren, $event)"
+                    ></td>
+                  </template>
+                  <td v-else :class="bodyClass('vuetable-td-'+field.name, field)"
+                      :key="fieldIndex"
+                      :style="{width: field.width}"
+                      v-html="renderNormalField(field, item)"
+                      @click="onCellClicked(item, itemIndex, field, $event)"
+                      @dblclick="onCellDoubleClicked(item, itemIndex, field, $event)"
+                      @contextmenu="onCellRightClicked(item, itemIndex, field, $event)"
                   ></td>
                 </template>
               </template>
@@ -77,14 +100,14 @@
           <template v-if="useDetailRow">
             <transition :name="detailRowTransition" :key="itemIndex">
               <tr v-if="isVisibleDetailRow(item[trackBy])"
-                @click="onDetailRowClick(item, itemIndex, $event)"
-                :class="onDetailRowClass(item, itemIndex)"
+                  @click="onDetailRowClick(item, itemIndex, $event)"
+                  :class="onDetailRowClass(item, itemIndex)"
               >
                 <td :colspan="countVisibleFields">
                   <component :is="detailRowComponent"
-                    :row-data="item"
-                    :row-index="itemIndex"
-                    :options="detailRowOptions"
+                             :row-data="item"
+                             :row-index="itemIndex"
+                             :options="detailRowOptions"
                   ></component>
                 </td>
               </tr>
@@ -94,8 +117,8 @@
         <template v-if="displayEmptyDataRow">
           <tr>
             <td :colspan="countVisibleFields"
-              class="vuetable-empty-result"
-              v-html="noDataTemplate"
+                class="vuetable-empty-result"
+                v-html="noDataTemplate"
             ></td>
           </tr>
         </template>
@@ -106,7 +129,7 @@
             </template>
           </tr>
         </template>
-      </tbody>
+        </tbody>
       </table>
     </div>
   </div>
@@ -201,8 +224,8 @@ export default {
       default: null
     },
     perPage: {
-        type: Number,
-        default: 10
+      type: Number,
+      default: 10
     },
     /**
      * Page that should be displayed when the table is first displayed
@@ -446,9 +469,9 @@ export default {
     },
 
     fields (newVal, oldVal) {
-    	this.normalizeFields();
+      this.normalizeFields();
     },
-},
+  },
 
   methods: {
 
@@ -596,8 +619,8 @@ export default {
 
     renderNormalField (field, item) {
       return this.hasFormatter(field)
-        ? this.callFormatter(field, item)
-        : this.getObjectValue(item, field.name, '')
+          ? this.callFormatter(field, item)
+          : this.getObjectValue(item, field.name, '')
     },
 
     isFieldComponent (fieldName) {
@@ -607,7 +630,7 @@ export default {
       }
 
       return fieldName.slice(0, this.fieldPrefix.length) === this.fieldPrefix
-        || fieldName.slice(0, 2) === '__'
+          || fieldName.slice(0, 2) === '__'
     },
 
     isFieldSlot (fieldName) {
@@ -675,9 +698,9 @@ export default {
 
       if (this.tablePagination === null) {
         this.warn('vuetable: pagination-path "' + this.paginationPath + '" not found. '
-          + 'It looks like the data returned from the server does not have pagination information '
-          + "or you may have set it incorrectly.\n"
-          + 'You can explicitly suppress this warning by setting pagination-path="".'
+            + 'It looks like the data returned from the server does not have pagination information '
+            + "or you may have set it incorrectly.\n"
+            + 'You can explicitly suppress this warning by setting pagination-path="".'
         )
       }
 
@@ -743,7 +766,7 @@ export default {
       }
 
       if ('offset' === this.paginationMode) {
-          params[this.queryParams.page] = this.currentPage
+        params[this.queryParams.page] = this.currentPage
       }
 
       params[this.queryParams.perPage] = this.perPage
@@ -777,7 +800,7 @@ export default {
     },
 
     isSortable (field) {
-      return field.sortField !== null
+      return field.sortField ?? false;
     },
 
     currentSortOrderPosition (field) {
@@ -879,7 +902,7 @@ export default {
       if ( ! this.hasFormatter(field)) return
 
       if (typeof(field.formatter) === 'function') {
-       return field.formatter(this.getObjectValue(item, field.name), this)
+        return field.formatter(this.getObjectValue(item, field.name), this)
       }
     },
 
@@ -960,8 +983,8 @@ export default {
     hideDetailRow (rowId) {
       if (this.isVisibleDetailRow(rowId)) {
         this.visibleDetailRows.splice(
-          this.visibleDetailRows.indexOf(rowId),
-          1
+            this.visibleDetailRows.indexOf(rowId),
+            1
         )
         this.updateHeader()
       }
@@ -1147,9 +1170,9 @@ export default {
         this.gotoNextPage()
       } else {
         if (this.paginationMode === 'cursor') {
-            this.gotoCursor(page)
+          this.gotoCursor(page)
         } else {
-            this.gotoPage(page)
+          this.gotoPage(page)
         }
       }
     },

@@ -4,15 +4,15 @@
       <template v-if="field.visible">
         <template v-if="vuetable.isFieldComponent(field.name)">
           <component :is="field.name"
-            :row-field="field"
-            :is-header="true"
-            :title="renderTitle(field)"
-            :vuetable="vuetable"
-            :key="fieldIndex"
-            :class="headerClass('vuetable-th-component', field)"
-            :style="{width: field.width}"
-            @vuetable:header-event="vuetable.onHeaderEvent"
-            @click="onColumnHeaderClicked(field, $event)"
+                     :row-field="field"
+                     :is-header="true"
+                     :title="renderTitle(field)"
+                     :vuetable="vuetable"
+                     :key="fieldIndex"
+                     :class="headerClass('vuetable-th-component', field)"
+                     :style="{width: field.width}"
+                     @vuetable:header-event="vuetable.onHeaderEvent"
+                     @click="onColumnHeaderClicked(field, $event)"
           ></component>
         </template>
         <template v-else-if="vuetable.isFieldSlot(field.name)">
@@ -24,13 +24,26 @@
           ></th>
         </template>
         <template v-else>
-          <th @click="onColumnHeaderClicked(field, $event)"
-            :key="fieldIndex"
-            :id="'_' + field.name"
-            :class="headerClass('vuetable-th', field)"
-            :style="{width: field.width}"
-            v-html="renderTitle(field)"
-          ></th>
+          <template v-if="field.children && Array.isArray(field.children)">
+            <th v-for="(fieldChildren, fieldChildrenIndex) in field.children"
+                @click="onColumnHeaderClicked(fieldChildren, $event)"
+                :key="'child_th_'+fieldChildrenIndex"
+                :id="'_' + fieldChildren.name"
+                :class="headerClass('vuetable-th', fieldChildren)"
+                :style="{width: fieldChildren.width}"
+                v-html="renderTitle(fieldChildren)"
+            ></th>
+          </template>
+          <template v-else>
+            <th v-if="isHeaderVisible(field)"
+                @click="onColumnHeaderClicked(field, $event)"
+                :key="fieldIndex"
+                :id="'_' + field.name"
+                :class="headerClass('vuetable-th', field)"
+                :style="{width: field.width}"
+                v-html="renderTitle(field)"
+            ></th>
+          </template>
         </template>
       </template>
     </template>
@@ -70,6 +83,14 @@ export default {
       return name.replace(this.vuetable.fieldPrefix, '')
     },
 
+    isHeaderVisible (field) {
+      if (field.header) {
+        return field.header.visible ?? true
+      }
+
+      return true;
+    },
+
     headerClass (base, field) {
       return [
         base + '-' + this.toSnakeCase(field.name),
@@ -81,8 +102,8 @@ export default {
 
     toSnakeCase (str) {
       return typeof(str) === 'string' && str.replace(/([A-Z])/g, (chr) => "_"+chr.toLowerCase())
-        .replace(' ', '_')
-        .replace('.', '_')
+          .replace(' ', '_')
+          .replace('.', '_')
     },
 
     sortClass (field) {
@@ -149,8 +170,8 @@ export default {
       if (typeof(field.title) === 'function') return field.title()
 
       return typeof(field.title) === 'undefined'
-        ? field.name.replace('.', ' ')
-        : field.title
+          ? field.name.replace('.', ' ')
+          : field.title
     },
 
     sortIconOpacity (field) {
@@ -182,8 +203,8 @@ export default {
 
     renderIconTag (classes, options = '') {
       return typeof(this.css.renderIcon) === 'undefined'
-        ? `<i class="${classes.join(' ')}" ${options}></i>`
-        : this.css.renderIcon(classes, options)
+          ? `<i class="${classes.join(' ')}" ${options}></i>`
+          : this.css.renderIcon(classes, options)
     },
 
     onColumnHeaderClicked (field, event) {
