@@ -373,9 +373,17 @@ export default {
       return this.tableData && typeof(this.tableData[0][this.trackBy]) !== 'undefined'
     },
     countVisibleFields () {
-      return this.tableFields.filter( (field) => {
-        return field.visible
-      }).length
+      let count = 0;
+
+      this.tableFields.forEach(field => {
+        if (field.children && Array.isArray(field.children)) {
+          count += field.children.length;
+        }
+
+        count++;
+      })
+
+      return count;
     },
     countTableData () {
       if (this.tableData === null) {
