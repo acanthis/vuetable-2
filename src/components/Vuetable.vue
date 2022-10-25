@@ -45,7 +45,7 @@
                   <template v-if="field.children && Array.isArray(field.children)">
                     <component v-for="(fieldChildren, fieldChildrenIndex) in field.children"
                                :is="fieldChildren.name"
-                               :key="'child_td_'+ fieldChildrenIndex"
+                               :key="'child_td_'+ fieldChildren.name"
                                :row-data="item" :row-index="itemIndex" :row-field="field"
                                :vuetable="vuetable"
                                :class="bodyClass('vuetable-component', field)"
@@ -77,7 +77,7 @@
                   <template v-if="field.children && Array.isArray(field.children)">
                     <td v-for="(fieldChildren, fieldChildrenIndex) in field.children"
                         :class="bodyClass('vuetable-td-'+fieldChildren.name, fieldChildren)"
-                        :key="'child_td_'+ fieldChildrenIndex"
+                        :key="'child_td_'+ fieldChildren.name"
                         :style="{width: fieldChildren.width}"
                         v-html="renderNormalField(fieldChildren, item)"
                         @click="onCellClicked(item, itemIndex, fieldChildren, $event)"
