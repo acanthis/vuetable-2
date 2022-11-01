@@ -69,6 +69,10 @@ export default {
       return this.$parent.sortOrder
     },
 
+    sortColumnState() {
+      return this.$parent.sortColumnState
+    },
+
     css() {
       return this.$parent.$_css
     },
