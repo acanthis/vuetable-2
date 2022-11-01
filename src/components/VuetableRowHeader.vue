@@ -119,6 +119,11 @@ export default {
 
     sortIcon (field) {
       let cls = this.css.sortableIcon
+
+      if (this.sortColumnState === 0) {
+        return cls;
+      }
+
       let i = this.currentSortOrderPosition(field)
 
       if (i !== false) {

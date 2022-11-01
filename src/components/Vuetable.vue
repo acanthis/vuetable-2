@@ -353,6 +353,7 @@ export default {
       lastScrollPosition: 0,
       scrollBarWidth: '17px', //chrome default
       scrollVisible: false,
+      sortColumnState: 0,
       $_css: {}
     }
   },
@@ -879,6 +880,15 @@ export default {
     },
 
     singleColumnSort (field) {
+      this.sortColumnState++;
+
+      if (this.sortColumnState > 2) {
+        this.sortColumnState = 0;
+        this.removeSortColumn(0)
+
+        return;
+      }
+
       if (this.sortOrder.length === 0) {
         // this.clearSortOrder()
         this.addSortColumn(field, 'asc')
