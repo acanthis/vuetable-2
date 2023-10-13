@@ -74,7 +74,7 @@ export default {
     },
 
     css() {
-      return this.$parent.$_css
+      return this.$parent.insideCss
     },
 
     vuetable() {
@@ -89,7 +89,7 @@ export default {
 
     isHeaderVisible (field) {
       if (field.header) {
-        return field.header.visible ?? true
+        return field.header.visible || true
       }
 
       return true;

@@ -24,7 +24,7 @@ export default {
     return {
       eventPrefix: 'vuetable-pagination:',
       tablePagination: null,
-      $_css: {}
+      insideCss: {}
     }
   },
   computed: {
@@ -69,7 +69,7 @@ export default {
   },
   methods: {
     mergeCss () {
-      this.$_css = {...CssSemanticUI.pagination, ...this.css}
+      this.insideCss = {...CssSemanticUI.pagination, ...this.css}
     },
     loadPage (page) {
       this.$emit(this.eventPrefix + 'change-page', page)

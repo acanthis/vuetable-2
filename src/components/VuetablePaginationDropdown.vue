@@ -1,17 +1,17 @@
 <template>
-  <div :class="[$_css.wrapperClass]">
+  <div :class="[insideCss.wrapperClass]">
     <a @click="loadPage('prev')"
-       :class="[$_css.linkClass, {[$_css.disabledClass] : isOnFirstPage}]">
-      <i :class="$_css.icons.prev"></i>
+       :class="[insideCss.linkClass, {[insideCss.disabledClass] : isOnFirstPage}]">
+      <i :class="insideCss.icons.prev"></i>
     </a>
-    <select :class="['vuetable-pagination-dropdown', $_css.dropdownClass]" @change="loadPage($event.target.selectedIndex+firstPage)">
-      <option v-for="(n, i) in totalPage" :key="n" :class="[$_css.pageClass]" :value="i+firstPage" :selected="isCurrentPage(i+firstPage)">
+    <select :class="['vuetable-pagination-dropdown', insideCss.dropdownClass]" @change="loadPage($event.target.selectedIndex+firstPage)">
+      <option v-for="(n, i) in totalPage" :key="n" :class="[insideCss.pageClass]" :value="i+firstPage" :selected="isCurrentPage(i+firstPage)">
         {{pageText}} {{n}}
       </option>
     </select>
     <a @click="loadPage('next')"
-       :class="[$_css.linkClass, {[$_css.disabledClass] : isOnLastPage}]">
-      <i :class="$_css.icons.next"></i>
+       :class="[insideCss.linkClass, {[insideCss.disabledClass] : isOnLastPage}]">
+      <i :class="insideCss.icons.next"></i>
     </a>
   </div>
 </template>
