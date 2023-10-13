@@ -25,7 +25,7 @@ export default {
   data: function() {
     return {
       tablePagination: null,
-      $_css: {}
+      insideCss: {}
     }
   },
   computed: {
@@ -45,7 +45,7 @@ export default {
   },
   methods: {
     mergeCss () {
-      this.$_css = {...CssSemanticUI.paginationInfo, ...this.css}
+      this.insideCss = {...CssSemanticUI.paginationInfo, ...this.css}
     },
     setPaginationData (tablePagination) {
       this.tablePagination = tablePagination
