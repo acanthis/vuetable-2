@@ -2,7 +2,7 @@
   <div :class="insideCss.tableWrapper">
     <div class="vuetable-head-wrapper" v-if="isFixedHeader">
       <table :class="['vuetable', insideCss.tableClass, insideCss.tableHeaderClass]">
-        <vuetable-col-group :is-header="true"/>
+        <vuetable-col-group :is-header="true" :field-prefix="fieldPrefix"/>
         <thead>
         <slot name="tableHeader" :fields="tableFields">
           <component v-for="(header, headerIndex) in headerRows" :is="header" :key="headerIndex" :fields="tableFields" @vuetable:header-event="onHeaderEvent"
@@ -14,7 +14,7 @@
 
     <div class="vuetable-body-wrapper" :class="{'fixed-header' : isFixedHeader}" :style="{height: tableHeight}">
       <table :class="['vuetable', isFixedHeader ? 'fixed-header' : '', insideCss.tableClass, insideCss.tableBodyClass]">
-        <vuetable-col-group/>
+        <vuetable-col-group :field-prefix="fieldPrefix"/>
         <thead v-if="!isFixedHeader">
         <slot name="tableHeader" :fields="tableFields">
           <component v-for="(header, headerIndex) in headerRows" :is="header" :key="headerIndex" :fields="tableFields"
@@ -441,7 +441,7 @@ export default {
     }
   },
 
-  destroyed () {
+  unmounted () {
     let elem = this.$el.getElementsByClassName('vuetable-body-wrapper')[0];
     if (elem != null) {
       elem.removeEventListener('scroll', this.handleScroll);
