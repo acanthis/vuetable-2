@@ -23,7 +23,10 @@ export default {
     isHeader: {
       type: Boolean,
       default: false
-    }
+    },
+    fieldPrefix: {
+      type: String,
+    },
   },
 
   computed: {
