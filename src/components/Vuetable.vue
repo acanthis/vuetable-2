@@ -969,7 +969,9 @@ export default {
     },
 
     gotoPage (page) {
-      if (page != this.currentPage && (page >= this.firstPage && page <= this.tablePagination.last_page)) {
+      const lastPageGreaterThanOrEqualPage = this.tablePagination.last_page ? page <= this.tablePagination.last_page : true;
+
+      if (page !== this.currentPage && page >= this.firstPage && lastPageGreaterThanOrEqualPage) {
         this.currentPage = page
         this.loadData()
       }
