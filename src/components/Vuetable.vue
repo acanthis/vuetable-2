@@ -23,7 +23,7 @@
         </slot>
         </thead>
         <tfoot>
-        <slot name="tableFooter" :fields="tableFields"></slot>
+        <slot name="tableFooter" :fields="tableFields" :data="tableTotalData"></slot>
         </tfoot>
         <tbody v-cloak class="vuetable-body">
         <tr v-for="(item, itemIndex) in tableData" :item-index="itemIndex" :key="itemIndex"
@@ -189,6 +189,10 @@ export default {
       type: String,
       default: 'links.pagination'
     },
+    totalDataPath: {
+      type: String,
+      default: 'total'
+    },
     queryParams: {
       type: [Object, Function],
       default () {
@@ -339,6 +343,7 @@ export default {
       tableFields: [],
       tableData: null,
       tablePagination: null,
+      tableTotalData: null,
       currentPage: this.initialPage,
       selectedTo: [],
       visibleDetailRows: [],
@@ -584,6 +589,7 @@ export default {
 
       this.tableData = this.getObjectValue(data, this.dataPath, null)
       this.tablePagination = this.getObjectValue(data, this.paginationPath, null)
+      this.tableTotalData = this.getObjectValue(data, this.totalDataPath, null)
 
       this.$nextTick( () => {
         this.checkIfRowIdentifierExists()
@@ -696,6 +702,7 @@ export default {
 
       this.tableData = this.getObjectValue(body, this.dataPath, null)
       this.tablePagination = this.getObjectValue(body, this.paginationPath, null)
+      this.tableTotalData = this.getObjectValue(body, this.totalDataPath, null)
 
       if (this.tablePagination === null) {
         this.warn('vuetable: pagination-path "' + this.paginationPath + '" not found. '
@@ -969,7 +976,9 @@ export default {
     },
 
     gotoPage (page) {
-      if (page != this.currentPage && (page >= this.firstPage && page <= this.tablePagination.last_page)) {
+      const lastPageGreaterThanOrEqualPage = this.tablePagination.last_page ? page <= this.tablePagination.last_page : true;
+
+      if (page !== this.currentPage && page >= this.firstPage && lastPageGreaterThanOrEqualPage) {
         this.currentPage = page
         this.loadData()
       }
