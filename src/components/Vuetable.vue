@@ -23,7 +23,7 @@
         </slot>
         </thead>
         <tfoot>
-        <slot name="tableFooter" :fields="tableFields" :data="tableTotalData"></slot>
+        <slot name="tableFooter" :fields="tableFields" :data="tableTotalData" :data-is-available="dataIsAvailable"></slot>
         </tfoot>
         <tbody v-cloak class="vuetable-body">
         <tr v-for="(item, itemIndex) in tableData" :item-index="itemIndex" :key="itemIndex"
