@@ -26,19 +26,30 @@
         <slot name="tableFooter" :fields="tableFields" :data="tableTotalData" :data-is-available="dataIsAvailable"></slot>
         </tfoot>
         <tbody v-cloak class="vuetable-body">
-        <tr v-for="(item, itemIndex) in tableData" :item-index="itemIndex" :key="itemIndex"
-            :class="onRowClass(item, itemIndex)"
-            @click="onRowClicked(item, itemIndex, $event)"
-            @dblclick="onRowDoubleClicked(item, itemIndex, $event)"
-            @mouseover="onMouseOver(item, itemIndex, $event)"
-        >
-          <template v-for="(field, fieldIndex) in tableFields">
-            <template v-if="field.visible">
-              <template v-if="isFieldComponent(field.name)">
-                <template v-if="field.children && Array.isArray(field.children)">
-                  <component v-for="(fieldChildren, fieldChildrenIndex) in field.children"
-                             :is="fieldChildren.name"
-                             :key="'child_td_'+ fieldChildren.name"
+        <template v-for="(item, itemIndex) in tableData" :key="itemIndex">
+          <tr :item-index="itemIndex"
+              :class="onRowClass(item, itemIndex)"
+              @click="onRowClicked(item, itemIndex, $event)"
+              @dblclick="onRowDoubleClicked(item, itemIndex, $event)"
+              @mouseover="onMouseOver(item, itemIndex, $event)"
+          >
+            <template v-for="(field, fieldIndex) in tableFields">
+              <template v-if="field.visible">
+                <template v-if="isFieldComponent(field.name)">
+                  <template v-if="field.children && Array.isArray(field.children)">
+                    <component v-for="(fieldChildren, fieldChildrenIndex) in field.children"
+                               :is="fieldChildren.name"
+                               :key="'child_td_'+ fieldChildren.name"
+                               :row-data="item" :row-index="itemIndex" :row-field="field"
+                               :vuetable="vuetable"
+                               :class="bodyClass('vuetable-component', field)"
+                               :style="{width: field.width}"
+                               @vuetable:field-event="onFieldEvent"
+                    ></component>
+                  </template>
+                  <component v-else
+                             :is="field.name"
+                             :key="fieldIndex"
                              :row-data="item" :row-index="itemIndex" :row-field="field"
                              :vuetable="vuetable"
                              :class="bodyClass('vuetable-component', field)"
@@ -46,80 +57,71 @@
                              @vuetable:field-event="onFieldEvent"
                   ></component>
                 </template>
-                <component v-else
-                           :is="field.name"
-                           :key="fieldIndex"
-                           :row-data="item" :row-index="itemIndex" :row-field="field"
-                           :vuetable="vuetable"
-                           :class="bodyClass('vuetable-component', field)"
-                           :style="{width: field.width}"
-                           @vuetable:field-event="onFieldEvent"
-                ></component>
-              </template>
-              <template v-else-if="isFieldSlot(field.name)">
-                <td :class="bodyClass('vuetable-slot', field)"
-                    :key="fieldIndex"
-                    :style="{width: field.width}"
-                >
-                  <slot :name="field.name"
-                        :row-data="item" :row-index="itemIndex" :row-field="field"
-                  ></slot>
-                </td>
-              </template>
-              <template v-else>
-                <template v-if="field.children && Array.isArray(field.children)">
-                  <td v-for="(fieldChildren, fieldChildrenIndex) in field.children"
-                      :class="bodyClass('vuetable-td-'+fieldChildren.name, fieldChildren)"
-                      :key="'child_td_'+ fieldChildren.name"
-                      :style="{width: fieldChildren.width}"
-                      v-html="renderNormalField(fieldChildren, item)"
-                      @click="onCellClicked(item, itemIndex, fieldChildren, $event)"
-                      @dblclick="onCellDoubleClicked(item, itemIndex, fieldChildren, $event)"
-                      @contextmenu="onCellRightClicked(item, itemIndex, fieldChildren, $event)"
+                <template v-else-if="isFieldSlot(field.name)">
+                  <td :class="bodyClass('vuetable-slot', field)"
+                      :key="fieldIndex"
+                      :style="{width: field.width}"
+                  >
+                    <slot :name="field.name"
+                          :row-data="item" :row-index="itemIndex" :row-field="field"
+                    ></slot>
+                  </td>
+                </template>
+                <template v-else>
+                  <template v-if="field.children && Array.isArray(field.children)">
+                    <td v-for="(fieldChildren, fieldChildrenIndex) in field.children"
+                        :class="bodyClass('vuetable-td-'+fieldChildren.name, fieldChildren)"
+                        :key="'child_td_'+ fieldChildren.name"
+                        :style="{width: fieldChildren.width}"
+                        v-html="renderNormalField(fieldChildren, item)"
+                        @click="onCellClicked(item, itemIndex, fieldChildren, $event)"
+                        @dblclick="onCellDoubleClicked(item, itemIndex, fieldChildren, $event)"
+                        @contextmenu="onCellRightClicked(item, itemIndex, fieldChildren, $event)"
+                    ></td>
+                  </template>
+                  <td v-else :class="bodyClass('vuetable-td-'+field.name, field)"
+                      :key="fieldIndex"
+                      :style="{width: field.width}"
+                      v-html="renderNormalField(field, item)"
+                      @click="onCellClicked(item, itemIndex, field, $event)"
+                      @dblclick="onCellDoubleClicked(item, itemIndex, field, $event)"
+                      @contextmenu="onCellRightClicked(item, itemIndex, field, $event)"
                   ></td>
                 </template>
-                <td v-else :class="bodyClass('vuetable-td-'+field.name, field)"
-                    :key="fieldIndex"
-                    :style="{width: field.width}"
-                    v-html="renderNormalField(field, item)"
-                    @click="onCellClicked(item, itemIndex, field, $event)"
-                    @dblclick="onCellDoubleClicked(item, itemIndex, field, $event)"
-                    @contextmenu="onCellRightClicked(item, itemIndex, field, $event)"
-                ></td>
               </template>
             </template>
+          </tr>
+          <template v-if="useDetailRow">
+            <transition :name="detailRowTransition" :key="itemIndex">
+              <tr v-if="isVisibleDetailRow(item[trackBy])"
+                  @click="onDetailRowClick(item, itemIndex, $event)"
+                  :class="onDetailRowClass(item, itemIndex)"
+              >
+                <td :colspan="countVisibleFields">
+                  <component :is="detailRowComponent"
+                             :row-data="item"
+                             :row-index="itemIndex"
+                             :options="detailRowOptions"
+                  ></component>
+                </td>
+              </tr>
+            </transition>
           </template>
-        </tr>
-        <template v-if="useDetailRow">
-          <transition :name="detailRowTransition" :key="itemIndex">
-            <tr v-if="isVisibleDetailRow(item[trackBy])"
-                @click="onDetailRowClick(item, itemIndex, $event)"
-                :class="onDetailRowClass(item, itemIndex)"
-            >
-              <td :colspan="countVisibleFields">
-                <component :is="detailRowComponent"
-                           :row-data="item"
-                           :row-index="itemIndex"
-                           :options="detailRowOptions"
-                ></component>
-              </td>
+          <template v-if="displayEmptyDataRow">
+            <tr>
+              <td :colspan="countVisibleFields"
+                  class="vuetable-empty-result"
+                  v-html="noDataTemplate"
+              ></td>
             </tr>
-          </transition>
-        </template>
-        <template v-if="displayEmptyDataRow">
-          <tr>
-            <td :colspan="countVisibleFields"
-                class="vuetable-empty-result"
-                v-html="noDataTemplate"
-            ></td>
-          </tr>
-        </template>
-        <template v-if="lessThanMinRows">
-          <tr v-for="i in blankRows" class="blank-row" :key="i">
-            <template v-for="(field, fieldIndex) in tableFields">
-              <td v-if="field.visible" :key="fieldIndex">&nbsp;</td>
-            </template>
-          </tr>
+          </template>
+          <template v-if="lessThanMinRows">
+            <tr v-for="i in blankRows" class="blank-row" :key="i">
+              <template v-for="(field, fieldIndex) in tableFields">
+                <td v-if="field.visible" :key="fieldIndex">&nbsp;</td>
+              </template>
+            </tr>
+          </template>
         </template>
         </tbody>
       </table>
